@@ -1,0 +1,4 @@
+run = "python deploy.py"
+
+[nix]
+channel = "stable-24_05"
