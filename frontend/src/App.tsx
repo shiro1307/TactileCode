@@ -93,6 +93,37 @@ export const App: React.FC = () => {
                 </li>
               </ul>
 
+              {/* Quick Summary Button */}
+              <button
+                onClick={() => {
+                  const groups: Record<string, number> = {};
+                  diagram.graph.nodes.forEach((n) => {
+                    const g = n.group || "unknown";
+                    groups[g] = (groups[g] || 0) + 1;
+                  });
+                  const groupStr = Object.entries(groups)
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join(", ");
+                  const summary = `Diagram has ${diagram.metadata.node_count} components and ${diagram.metadata.edge_count} connections. Groups: ${groupStr}.`;
+                  setAnnouncement(summary);
+                  alert(summary);
+                }}
+                style={{
+                  marginTop: "12px",
+                  padding: "8px 12px",
+                  backgroundColor: "var(--color-primary)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                }}
+                aria-label="Generate a text summary of this diagram"
+              >
+                📋 Generate Summary
+              </button>
+
               {diagram.graph.warnings.length > 0 && (
                 <div style={{ marginTop: "14px" }}>
                   <h4 style={{ fontSize: "0.8rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
