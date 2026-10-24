@@ -1,12 +1,9 @@
 /**
  * API Configuration
- * Uses production backend URL if available, otherwise falls back to relative paths
+ * Uses production backend URL from env var if set, otherwise relative paths
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
-    ? 'http://localhost:8000'
-    : 'https://tactilecode-1.onrender.com');
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export const API_ENDPOINTS = {
   UPLOAD_DIAGRAM: `${API_BASE_URL}/api/diagrams`,
