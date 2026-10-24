@@ -5,6 +5,7 @@ import {
   DependentsQueryResult,
   GroupQueryResult,
 } from "../types";
+import API_ENDPOINTS from "../config";
 import {
   Search,
   ArrowRight,
@@ -51,7 +52,7 @@ export const GraphQueryBuilder: React.FC<QueryBuilderProps> = ({
     setIsLoading(true);
 
     try {
-      let url = `http://localhost:8000/api/diagrams/${diagramId}/query/`;
+      let url = `${API_ENDPOINTS.UPLOAD_DIAGRAM.split('/api/')[0]}/api/diagrams/${diagramId}/query/`;
       let resultMessage = "";
 
       switch (queryType) {

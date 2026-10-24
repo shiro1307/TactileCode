@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { UploadCloud, FileImage, Sparkles, AlertCircle, Loader2 } from "lucide-react";
 import { DiagramResponse } from "../types";
+import API_ENDPOINTS from "../config";
 
 interface UploaderProps {
   onDiagramLoaded: (diagram: DiagramResponse) => void;
@@ -21,7 +22,7 @@ export const DiagramUploader: React.FC<UploaderProps> = ({ onDiagramLoaded, onAn
     formData.append("file", file);
 
     try {
-      const response = await fetch("/api/diagrams", {
+      const response = await fetch(API_ENDPOINTS.UPLOAD_DIAGRAM, {
         method: "POST",
         body: formData,
       });
@@ -53,7 +54,7 @@ export const DiagramUploader: React.FC<UploaderProps> = ({ onDiagramLoaded, onAn
     onAnnounce("Loading sample architecture diagram for testing.");
 
     try {
-      const response = await fetch("/api/diagrams/sample/architecture");
+      const response = await fetch(API_ENDPOINTS.GET_SAMPLE);
       if (!response.ok) {
         throw new Error(`Sample fetch failed with HTTP ${response.status}`);
       }

@@ -80,6 +80,20 @@ npm run dev
 
 Then go to http://localhost:5173, upload a diagram, and navigate with keyboard + screen reader.
 
+## Production Deployment
+
+**Backend:** https://tactilecode-1.onrender.com
+**Frontend:** Ready to deploy to Vercel or any static host
+
+The frontend automatically detects the environment:
+- **Local dev** (localhost): Uses http://localhost:8000
+- **Production**: Uses https://tactilecode-1.onrender.com
+
+To override, set environment variable:
+```bash
+VITE_API_URL=https://your-backend-url.com
+```
+
 ## Demo (15 minutes)
 1. Upload diagram → show extraction
 2. Navigate with arrow keys → show keyboard accessibility
