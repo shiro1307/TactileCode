@@ -40,20 +40,69 @@ export interface DiagramResponse {
 }
 
 export interface NodeConnectionQuery {
+  status: "found" | "not_found";
   node_id: string;
+  node_label?: string;
   incoming: Array<{
-    source: string;
-    label?: string | null;
+    source_id: string;
+    source_label: string;
+    relationship: string;
     direction: string;
     confidence: number;
     uncertainty?: string | null;
   }>;
   outgoing: Array<{
-    target: string;
-    label?: string | null;
+    target_id: string;
+    target_label: string;
+    relationship: string;
     direction: string;
     confidence: number;
     uncertainty?: string | null;
   }>;
   total_connections: number;
+  node_uncertainty?: string | null;
+}
+
+export interface PathQueryResult {
+  status: "found" | "no_path" | "source_not_found" | "target_not_found";
+  source_id: string;
+  target_id: string;
+  path_length?: number;
+  path: Array<{
+    step: number;
+    node_id?: string;
+    node_label?: string;
+    node_group?: string;
+    type?: string;
+    relationship?: string;
+    direction?: string;
+    confidence?: number;
+  }>;
+}
+
+export interface DependentsQueryResult {
+  status: "found" | "not_found";
+  node_id: string;
+  node_label: string;
+  dependents: Array<{
+    node_id: string;
+    node_label: string;
+    node_group?: string;
+  }>;
+  dependent_count: number;
+}
+
+export interface GroupQueryResult {
+  status: "found" | "not_found";
+  group_name: string;
+  nodes: Array<{
+    node_id: string;
+    node_label: string;
+    confidence: number;
+    uncertainty?: string | null;
+  }>;
+  node_count: number;
+  internal_connection_count?: number;
+  external_connection_count?: number;
+  summary_text?: string;
 }

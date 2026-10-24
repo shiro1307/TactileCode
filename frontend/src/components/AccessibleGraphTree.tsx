@@ -19,6 +19,7 @@ export const AccessibleGraphTree: React.FC<GraphTreeProps> = ({
 }) => {
   const [focusedIndex, setFocusedIndex] = React.useState<number>(0);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (selectedNodeId) {
@@ -31,30 +32,39 @@ export const AccessibleGraphTree: React.FC<GraphTreeProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
     let nextIndex = index;
+    let handled = false;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
       nextIndex = (index + 1) % nodes.length;
+      handled = true;
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       nextIndex = (index - 1 + nodes.length) % nodes.length;
+      handled = true;
     } else if (e.key === "Home") {
       e.preventDefault();
       nextIndex = 0;
+      handled = true;
     } else if (e.key === "End") {
       e.preventDefault();
       nextIndex = nodes.length - 1;
+      handled = true;
     } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       selectNodeByIndex(index);
       return;
-    } else {
+    } else if (e.key === "?") {
+      e.preventDefault();
+      announceKeyboardShortcuts();
       return;
     }
 
-    setFocusedIndex(nextIndex);
-    itemRefs.current[nextIndex]?.focus();
-    announceNodeBrief(nodes[nextIndex]);
+    if (handled) {
+      setFocusedIndex(nextIndex);
+      itemRefs.current[nextIndex]?.focus();
+      announceNodeBrief(nodes[nextIndex]);
+    }
   };
 
   const selectNodeByIndex = (index: number) => {
@@ -65,8 +75,9 @@ export const AccessibleGraphTree: React.FC<GraphTreeProps> = ({
     const outgoing = edges.filter((e) => e.source === node.id);
     const incoming = edges.filter((e) => e.target === node.id);
 
-    let speech = `Selected ${node.label}, group ${node.group || "none"}. `;
-    speech += `${outgoing.length} outgoing connections, ${incoming.length} incoming connections. `;
+    let speech = `Selected ${node.label}`;
+    if (node.group) speech += `, group ${node.group}`;
+    speech += `. ${outgoing.length} outgoing, ${incoming.length} incoming connections. `;
     if (node.uncertainty) {
       speech += `Warning: ${node.uncertainty}. `;
     }
@@ -79,8 +90,19 @@ export const AccessibleGraphTree: React.FC<GraphTreeProps> = ({
     const incomingCount = edges.filter((e) => e.target === node.id).length;
     const warn = node.uncertainty ? ", has uncertainty warning" : "";
     onAnnounce(
-      `${node.label}, ${node.group || "component"}. ${outgoingCount} out, ${incomingCount} in${warn}.`
+      `${node.label}, ${node.group || "component"}. ${outgoingCount} out, ${incomingCount} in${warn}. Press Enter to select.`
     );
+  };
+
+  const announceKeyboardShortcuts = () => {
+    const shortcuts = `
+      Arrow Up and Down: Navigate between components.
+      Home and End: Jump to first or last component.
+      Enter or Space: Select and inspect the current component.
+      Tab: Move to next interactive element.
+      Shift Tab: Move to previous interactive element.
+    `;
+    onAnnounce(shortcuts);
   };
 
   if (nodes.length === 0) {
@@ -103,10 +125,11 @@ export const AccessibleGraphTree: React.FC<GraphTreeProps> = ({
       </div>
 
       <p className="sr-only">
-        Use Up and Down Arrow keys to navigate components. Press Enter or Space to inspect details and connections.
+        Use Up and Down Arrow keys to navigate components. Press Enter or Space to inspect details and connections. Press ? for keyboard help.
       </p>
 
       <div
+        ref={containerRef}
         role="listbox"
         aria-labelledby="nodes-list-title"
         aria-activedescendant={nodes[focusedIndex] ? `node-item-${nodes[focusedIndex].id}` : undefined}
@@ -127,6 +150,9 @@ export const AccessibleGraphTree: React.FC<GraphTreeProps> = ({
               ref={(el) => (itemRefs.current[idx] = el)}
               role="option"
               aria-selected={isSelected}
+              aria-label={`${node.label}${node.group ? `, in ${node.group}` : ""}, ${outgoing} outgoing, ${incoming} incoming${
+                node.uncertainty ? `, Warning: ${node.uncertainty}` : ""
+              }`}
               tabIndex={isFocused ? 0 : -1}
               className={`tree-node-item ${isSelected ? "selected" : ""}`}
               onClick={() => {
@@ -174,6 +200,10 @@ export const AccessibleGraphTree: React.FC<GraphTreeProps> = ({
           );
         })}
       </div>
+
+      <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "12px", fontStyle: "italic" }}>
+        Press <kbd>?</kbd> for keyboard navigation help.
+      </p>
     </div>
   );
 };

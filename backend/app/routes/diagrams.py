@@ -8,6 +8,7 @@ from app.models.graph import DiagramResponse
 from app.services.extractor import DiagramExtractionPipeline
 from app.services.storage import diagram_storage
 from app.services.validator import get_connected_neighbors
+from app.services.query_engine import GraphQueryEngine
 from app.config import settings
 
 router = APIRouter(prefix="/api/diagrams", tags=["Diagrams"])
@@ -91,4 +92,117 @@ async def get_node_neighbors(diagram_id: str, node_id: str) -> Dict[str, Any]:
             detail=f"Diagram with ID '{diagram_id}' not found."
         )
 
-    return get_connected_neighbors(diagram.graph, node_id)
+    engine = GraphQueryEngine(diagram.graph)
+    return engine.get_neighbors(node_id)
+
+
+@router.get("/{diagram_id}/query/path")
+async def query_path(diagram_id: str, source: str, target: str) -> Dict[str, Any]:
+    """
+    Find a path between two nodes.
+    """
+    diagram = diagram_storage.get(diagram_id)
+    if not diagram:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Diagram with ID '{diagram_id}' not found."
+        )
+
+    engine = GraphQueryEngine(diagram.graph)
+    return engine.find_path(source, target)
+
+
+@router.get("/{diagram_id}/query/dependents")
+async def query_dependents(diagram_id: str, node_id: str) -> Dict[str, Any]:
+    """
+    Get all nodes that depend on (point to) the given node.
+    """
+    diagram = diagram_storage.get(diagram_id)
+    if not diagram:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Diagram with ID '{diagram_id}' not found."
+        )
+
+    engine = GraphQueryEngine(diagram.graph)
+    return engine.get_dependents(node_id)
+
+
+@router.get("/{diagram_id}/query/dependencies")
+async def query_dependencies(diagram_id: str, node_id: str) -> Dict[str, Any]:
+    """
+    Get all nodes that the given node depends on (points to).
+    """
+    diagram = diagram_storage.get(diagram_id)
+    if not diagram:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Diagram with ID '{diagram_id}' not found."
+        )
+
+    engine = GraphQueryEngine(diagram.graph)
+    return engine.get_dependencies(node_id)
+
+
+@router.get("/{diagram_id}/query/group/{group_name}")
+async def query_group(diagram_id: str, group_name: str) -> Dict[str, Any]:
+    """
+    Find all nodes in a specific group.
+    """
+    diagram = diagram_storage.get(diagram_id)
+    if not diagram:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Diagram with ID '{diagram_id}' not found."
+        )
+
+    engine = GraphQueryEngine(diagram.graph)
+    return engine.find_nodes_by_group(group_name)
+
+
+@router.get("/{diagram_id}/query/group/{group_name}/summary")
+async def summarize_group(diagram_id: str, group_name: str) -> Dict[str, Any]:
+    """
+    Get a summary of a group including internal/external connections.
+    """
+    diagram = diagram_storage.get(diagram_id)
+    if not diagram:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Diagram with ID '{diagram_id}' not found."
+        )
+
+    engine = GraphQueryEngine(diagram.graph)
+    return engine.summarize_group(group_name)
+
+
+@router.get("/{diagram_id}/query/groups")
+async def query_all_groups(diagram_id: str) -> Dict[str, Any]:
+    """
+    Get a summary of all groups in the diagram.
+    """
+    diagram = diagram_storage.get(diagram_id)
+    if not diagram:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Diagram with ID '{diagram_id}' not found."
+        )
+
+    engine = GraphQueryEngine(diagram.graph)
+    return engine.get_all_groups()
+
+
+@router.get("/{diagram_id}/query/reachable/{node_id}")
+async def query_reachable(diagram_id: str, node_id: str) -> Dict[str, Any]:
+    """
+    Analyze which nodes are reachable from a given node.
+    """
+    diagram = diagram_storage.get(diagram_id)
+    if not diagram:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Diagram with ID '{diagram_id}' not found."
+        )
+
+    engine = GraphQueryEngine(diagram.graph)
+    return engine.reachability_analysis(node_id)

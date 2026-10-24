@@ -393,3 +393,60 @@ kbd {
   font-weight: 700;
   color: var(--text-primary);
 }
+
+/* Input & Select Styles */
+input[type="text"],
+input[type="file"],
+select,
+textarea {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-input, #0f172a);
+  border: 1px solid var(--border-color, var(--border-subtle));
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  transition: border-color 0.15s;
+}
+
+input[type="text"]:focus,
+input[type="file"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+
+select {
+  cursor: pointer;
+}
+
+option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* Link button styling */
+.link-button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: inherit;
+  padding: 0;
+  margin: 0;
+  font-weight: 600;
+}
+
+.link-button:hover {
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+.link-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

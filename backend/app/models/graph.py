@@ -49,6 +49,19 @@ class GraphData(BaseModel):
     warnings: List[str] = Field(default_factory=list, description="Structural or perceptual warnings")
 
 
+class VerificationReport(BaseModel):
+    is_valid: bool = Field(..., description="True if graph is structurally consistent")
+    total_nodes: int
+    total_edges: int
+    orphaned_nodes: List[str] = Field(default_factory=list, description="Node IDs with zero incoming or outgoing connections")
+    dangling_edges: List[str] = Field(default_factory=list, description="Edge IDs referencing missing nodes")
+    low_confidence_elements: List[str] = Field(default_factory=list, description="IDs of nodes/edges with confidence < 0.75")
+    self_loops: List[str] = Field(default_factory=list, description="Edge IDs where source == target")
+    connected_components: int = Field(default=1, description="Number of disconnected subgraphs")
+    uncertainty_count: int = Field(default=0, description="Total count of explicitly flagged uncertain items")
+    verification_summary: str = Field(..., description="Plain-language summary of verification results")
+
+
 class DiagramMetadata(BaseModel):
     diagram_id: str
     filename: str
@@ -64,3 +77,4 @@ class DiagramResponse(BaseModel):
     status: str
     graph: GraphData
     metadata: DiagramMetadata
+    verification: Optional[VerificationReport] = None

@@ -5,6 +5,7 @@ import { AccessibleGraphTree } from "./components/AccessibleGraphTree";
 import { NodeDetailPanel } from "./components/NodeDetailPanel";
 import { AccessibleGraphCanvas } from "./components/AccessibleGraphCanvas";
 import { AccessibleLiveAnnouncer } from "./components/AccessibleLiveAnnouncer";
+import { GraphQueryBuilder } from "./components/GraphQueryBuilder";
 import { Network, Keyboard, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 export const App: React.FC = () => {
@@ -61,8 +62,8 @@ export const App: React.FC = () => {
 
       {/* Main Grid Layout */}
       <main id="main-graph-area" className="main-grid" tabIndex={-1}>
-        {/* Left Column: Uploader & Summary Stats */}
-        <section aria-label="Ingestion and Diagram Stats" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        {/* Left Column: Uploader & Summary Stats & Query Builder */}
+        <section aria-label="Ingestion, Diagram Stats, and Queries" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <DiagramUploader
             onDiagramLoaded={handleDiagramLoaded}
             onAnnounce={setAnnouncement}
@@ -105,6 +106,21 @@ export const App: React.FC = () => {
                 </div>
               )}
             </div>
+          )}
+
+          {diagram && (
+            <GraphQueryBuilder
+              diagramId={diagram.diagram_id}
+              nodes={diagram.graph.nodes}
+              onSelectNode={(nodeId) => {
+                handleSelectNodeById(nodeId);
+                const node = diagram.graph.nodes.find((n) => n.id === nodeId);
+                if (node) {
+                  setAnnouncement(`Navigated to ${node.label}`);
+                }
+              }}
+              onAnnounce={setAnnouncement}
+            />
           )}
         </section>
 
