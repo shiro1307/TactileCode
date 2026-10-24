@@ -138,11 +138,33 @@ class GeminiGemmaClient(BaseModelClient):
 
 def get_model_client() -> BaseModelClient:
     """
-    Factory function returning live model client if API key is present,
-    otherwise returning mock client.
+    Factory function returning model client in priority order:
+    1. Gemma 4 API (official google-genai SDK) - RECOMMENDED
+    2. Ollama (if enabled and available locally)
+    3. Gemini API (legacy, if key configured)
+    4. Mock client (fallback for demo)
     """
-    if settings.api_key and settings.api_key.strip():
+    # Try Gemma 4 API first (primary)
+    if settings.gemma_api_key and settings.gemma_api_key.strip():
+        logger.info("Initializing GemmaClient (Gemma 4 via Google AI Studio)")
+        from app.services.gemma_client import GemmaClient
+        return GemmaClient(api_key=settings.gemma_api_key.strip())
+    
+    # Try Ollama (if enabled)
+    if settings.ollama_enabled:
+        logger.info(f"Initializing OllamaClient (model: {settings.ollama_model})")
+        from app.services.ollama_client import OllamaClient
+        return OllamaClient(
+            base_url=settings.ollama_base_url,
+            model=settings.ollama_model,
+            timeout=settings.ollama_timeout_seconds,
+        )
+    
+    # Try Gemini API (legacy fallback)
+    if settings.gemini_api_key and settings.gemini_api_key.strip():
         logger.info(f"Initialized GeminiGemmaClient with model '{settings.model_name}'")
-        return GeminiGemmaClient(api_key=settings.api_key.strip(), model_name=settings.model_name)
-    logger.info("No API key configured; using MockGemmaClient")
+        return GeminiGemmaClient(api_key=settings.gemini_api_key.strip(), model_name=settings.model_name)
+    
+    # Fall back to mock
+    logger.info("No API keys configured; using MockGemmaClient")
     return MockGemmaClient()
